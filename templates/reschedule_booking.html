@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4" style="max-width: 500px;">
+    <h3 class="text-center mb-3">Reschedule Booking #{{ booking.id }}</h3>
+    <div class="border rounded bg-white p-3 mb-4">
+        <p class="mb-1"><strong>Student:</strong> {{ booking.student.name }} ({{ booking.student.email }})</p>
+        <p class="mb-1"><strong>Exam:</strong> {{ booking.slot.exam.exam_name }}</p>
+        <p class="mb-0 text-muted"><strong>Current Slot:</strong> {{ booking.slot.date }} | {{ booking.slot.start_time }} - {{ booking.slot.end_time }}</p>
+    </div>
+
+    {% if available_slots %}
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label fw-bold">Select New Slot</label>
+            <select name="new_slot_id" class="form-select" required>
+                <option value="">Choose an available slot</option>
+                {% for s in available_slots %}
+                <option value="{{ s.id }}">
+                    Slot #{{ s.id }} | {{ s.date }} ({{ s.start_time }} - {{ s.end_time }}) — {{ s.available_seats }} seats left
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('registered_students', exam_id=booking.slot.exam_id) }}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Confirm Reschedule</button>
+        </div>
+    </form>
+    {% else %}
+    <div class="alert alert-warning">No other available slots exist for this examination.</div>
+    <a href="{{ url_for('registered_students', exam_id=booking.slot.exam_id) }}" class="btn btn-secondary">Back</a>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Examiner Dashboard</h2>
+        <span>Welcome, {{ session.get('name') }}</span>
+    </div>
+
+    <div class="row row-cols-2 row-cols-md-4 g-3 mb-5">
+        <div class="col">
+            <div class="card text-center">
+                <div class="card-header">Assigned Exams</div>
+                <div class="card-body"><h3>{{ assigned_exams|length }}</h3></div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-center">
+                <div class="card-header">Created Slots</div>
+                <div class="card-body"><h3>{{ created_slots|length }}</h3></div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-center">
+                <div class="card-header">Students Booked</div>
+                <div class="card-body"><h3>{{ total_booked }}</h3></div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-center">
+                <div class="card-header">Pending Evaluations</div>
+                <div class="card-body"><h3>{{ pending_evaluations }}</h3></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-5">
+        <h4 class="mb-3">Assigned Examinations</h4>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Course</th>
+                        <th>Exam Name</th>
+                        <th>Type</th>
+                        <th>Duration</th>
+                        <th>Max Marks</th>
+                        <th>Slot Creation Window</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam in assigned_exams %}
+                    <tr>
+                        <td>{{ exam.id }}</td>
+                        <td>{{ exam.course.course_name }}</td>
+                        <td>{{ exam.exam_name }}</td>
+                        <td>{{ exam.exam_type }}</td>
+                        <td>{{ exam.duration }} mins</td>
+                        <td>{{ exam.max_marks }}</td>
+                        <td>{{ exam.slot_creation_start_date }} to {{ exam.slot_creation_end_date }}</td>
+                        <td>{{ exam.status }}</td>
+                        <td>
+                            {% if exam.status == 'Slot Creation' and exam.slot_creation_start_date <= today <= exam.slot_creation_end_date %}
+                            <a href="{{ url_for('create_slot', exam_id=exam.id) }}" class="btn btn-success btn-sm">Create Slot</a>
+                            {% else %}
+                            <span class="text-muted small">Window Closed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">No examinations assigned to you yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mb-5">
+        <h4 class="mb-3">My Created Slots</h4>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Slot ID</th>
+                        <th>Exam</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Capacity</th>
+                        <th>Available Seats</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in created_slots %}
+                    <tr>
+                        <td>{{ slot.id }}</td>
+                        <td>{{ slot.exam.exam_name }} ({{ slot.exam.course.course_name }})</td>
+                        <td>{{ slot.date }}</td>
+                        <td>{{ slot.start_time }} - {{ slot.end_time }}</td>
+                        <td>{{ slot.max_capacity }}</td>
+                        <td>{{ slot.available_seats }}</td>
+                        <td>{{ slot.status }}</td>
+                        <td class="d-flex">
+                            <a href="{{ url_for('evaluate_slot', slot_id=slot.id) }}" class="btn btn-primary btn-sm" style="margin-right:5px">Students & Grade</a>
+                            {% if today < slot.exam.slot_booking_start_date and slot.available_seats == slot.max_capacity %}
+                            <a href="{{ url_for('edit_slot', slot_id=slot.id) }}" class="btn btn-warning btn-sm" style="margin-right:5px">Edit</a>
+                            <form method="POST" action="{{ url_for('delete_slot', slot_id=slot.id) }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No slots created yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

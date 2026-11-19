@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4" style="max-width: 500px;">
+    <h3 class="text-center mb-2">Edit Slot #{{ slot.id }}</h3>
+    <p class="text-center text-muted mb-4">{{ slot.exam.course.course_code }} - {{ slot.exam.exam_name }}</p>
+
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Exam Slot Date</label>
+            <input type="date" name="date" class="form-control" value="{{ slot.date }}" min="{{ slot.exam.slot_booking_end_date }}" required>
+            <small class="text-muted">Must be on or after student booking closes ({{ slot.exam.slot_booking_end_date }}).</small>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col">
+                <label class="form-label">Start Time</label>
+                <input type="time" name="start_time" class="form-control" value="{{ slot.start_time }}" required>
+            </div>
+            <div class="col">
+                <label class="form-label">End Time</label>
+                <input type="time" name="end_time" class="form-control" value="{{ slot.end_time }}" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Max Capacity (Students)</label>
+            <input type="number" name="max_capacity" class="form-control" min="1" value="{{ slot.max_capacity }}" required>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('examiner_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Slot</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

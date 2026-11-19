@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<div class="container mt-4">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h2>Admin Dashboard</h2>
+		<span>Welcome, {{ session.get('name', 'Admin') }}</span>
+	</div>
+	
+	<div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 mb-5">
+		
+		<div class="col">
+			<div class="card text-center">
+				<div class="card-header">Courses</div>
+				<div class="card-body">
+					<h3>{{ total_courses }}</h3>
+				</div>
+			</div>
+		</div>
+			
+		<div class="col">
+			<div class="card text-center">
+				<div class="card-header">Exams</div>
+				<div class="card-body">
+					<h3>{{ total_exams }}</h3>
+				</div>
+			</div>
+		</div>		
+
+		<div class="col">
+			<div class="card text-center">
+				<div class="card-header">Examiners</div>
+				<div class="card-body">
+					<h3>{{ total_examiners }}</h3>
+				</div>
+			</div>
+		</div>
+
+		<div class="col">
+			<div class="card text-center">
+				<div class="card-header">Students</div>
+				<div class="card-body">
+					<h3>{{ total_students }}</h3>
+				</div>
+			</div>
+		</div>
+
+		<div class="col">
+			<div class="card text-center">
+				<div class="card-header">Slots</div>
+				<div class="card-body">
+					<h3>{{ total_slots }}</h3>
+				</div>
+			</div>
+		</div>
+
+		<div class="col">
+				<div class="card text-center">
+					<div class="card-header">Bookings</div>
+					<div class="card-body">
+						<h3>{{ total_bookings }}</h3>
+					</div>
+				</div>
+			</div>
+	</div>
+	
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<h4>Courses</h4>
+		
+		<a href="{{ url_for('add_course') }}" class="btn btn-outline-success">Add Course</a>
+	</div>
+	
+	<div class="table-responsive">
+		<table class="table align-middle">
+			<thead class="align-middle">
+				<tr>
+					<th>ID</th>
+					<th>Course Code</th>
+					<th>Course Name</th>
+					<th>Description</th>
+					<th>Status</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for c in courses %}
+				<tr>
+					<td>{{ c.id }}</td>
+					<td>{{ c.course_code }}</td>
+					<td>{{ c.course_name }}</td>
+					<td>{{ c.description }}</td>
+					<td>{{ c.status }}</td>
+					<td>
+						<a href="{{ url_for('edit_course', course_id=c.id) }}" class="btn btn-primary btn-sm" style="margin:5px">Edit</a>
+						<form method="POST" action="{{ url_for('delete_course', course_id=c.id) }}">
+							<button type="submit" class="btn btn-danger btn-sm">Delete</button>
+						</form>
+					</td>
+				</tr>
+				{% else %}
+				<tr>
+					<td colspan="6" class="text-center text-muted">
+						No courses created yet.
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="container mt-5 mb-5">
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<h4>Examinations</h4>
+		<div>
+			<a class="btn btn-outline-success" href="{{ url_for('add_examination') }}">Add Examination</a>
+		</div>
+	</div>
+	
+	<div class="table-responsive">
+		<form method="GET" class="d-flex mb-3" style="max-width: 350px;">
+			<input type="text" name="q" class="form-control form-control-sm me-2" placeholder="Search by Name or ID" value="{{ search_q or '' }}">
+			<button type="submit" class="btn btn-outline-primary btn-sm me-1">Search</button>
+			{% if search_q %}
+			<a href="{{ request.path }}" class="btn btn-outline-secondary btn-sm">Clear</a>
+			{% endif %}
+		</form>
+
+		<table class="table align-middle">
+			<thead class="table-light">
+				<tr>
+					<th>ID</th>
+					<th>Course</th>
+					<th>Exam Name</th>
+					<th>Examiner</th>
+					<th>Type</th>
+					<th>Duration</th>
+					<th>Max Marks</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for exam in examinations %}
+					<tr>
+						<td>{{ exam.id }}</td>
+						<td>{{ exam.course.course_name }}</td>
+						<td>{{ exam.exam_name }}</td>
+						<td>{{ exam.examiner.name if exam.examiner else 'Unassigned' }}</td>
+						<td>{{ exam.exam_type }}</td>
+						<td>{{ exam.duration }} mins</td>
+						<td>{{ exam.max_marks }}</td>
+						<td>{{ exam.status }}</td>
+						<td class="d-flex">
+							<a href="{{ url_for('registered_students', exam_id=exam.id) }}" class="btn btn-secondary btn-sm" style="margin-right:5px">Students</a>
+							<a href="{{ url_for('view_rubrics', exam_id=exam.id) }}" class="btn btn-info btn-sm" style="margin-right:5px">Rubrics</a>
+							<a href="{{ url_for('exam_slots', exam_id=exam.id) }}" class="btn btn-warning btn-sm" style="margin-right:5px">Slots</a>
+							<a href="{{ url_for('edit_examination', exam_id=exam.id) }}" class="btn btn-primary btn-sm" style="margin-right:5px">Edit</a>
+							<form method="POST" action="{{ url_for('delete_examination', exam_id=exam.id) }}">
+								<button type="submit" class="btn btn-danger btn-sm">Delete</button>
+							</form>
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="9" class="text-center text-muted">No Examinations Created Yet.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

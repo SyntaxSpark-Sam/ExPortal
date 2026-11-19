@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Registered Students for {{ exam.exam_name }}</h3>
+            <span class="text-muted">Course: {{ exam.course.course_name }}</span>
+        </div>
+    </div>
+    <form method="GET" class="d-flex mb-3" style="max-width: 350px;">
+        <input type="text" name="q" class="form-control form-control-sm me-2" placeholder="Search by Name or ID..." value="{{ search_q or '' }}">
+        <button type="submit" class="btn btn-outline-primary btn-sm me-1">Search</button>
+        {% if search_q %}
+        <a href="{{ request.path }}" class="btn btn-outline-secondary btn-sm">Clear</a>
+        {% endif %}
+    </form>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Student Name</th>
+                    <th>Email</th>
+                    <th>Slot Date & Time</th>
+                    <th>Status</th>
+                    <th>Marks</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.id }}</td>
+                    <td>{{ booking.student.name }}</td>
+                    <td>{{ booking.student.email }}</td>
+                    <td>{{ booking.slot.date }} | {{ booking.slot.start_time }} - {{ booking.slot.end_time }}</td>
+                    <td>{{ booking.status }}</td>
+                    <td>{{ booking.marks }}</td>
+                    <td class="d-flex">
+                        {% if booking.status == 'Booked' %}
+                        <a href="{{ url_for('reschedule_booking', booking_id=booking.id) }}" class="btn btn-warning btn-sm" style="margin-right:5px">Reschedule</a>
+                        <form method="POST" action="{{ url_for('cancel_booking', booking_id=booking.id) }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted small">{{ booking.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No students registered for this examination yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+		<a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+	</div>
+</div>
+{% endblock %}

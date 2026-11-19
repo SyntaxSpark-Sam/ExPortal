@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4" style="max-width: 500px;">
+    <h3 class="text-center mb-4">Edit Slot</h3>
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-control" value="{{ slot.date }}" required>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col">
+                <label class="form-label">Start Time</label>
+                <input type="time" name="start_time" class="form-control" value="{{ slot.start_time }}" required>
+            </div>
+            <div class="col">
+                <label class="form-label">End Time</label>
+                <input type="time" name="end_time" class="form-control" value="{{ slot.end_time }}" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Assigned Examiner</label>
+            <select name="examiner_id" class="form-select" required>
+                {% for ex in examiners %}
+                <option value="{{ ex.id }}" {% if ex.id == slot.examiner_id %}selected{% endif %}>
+                    {{ ex.name }} ({{ ex.department or 'N/A' }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select" required>
+                {% for st in ['Available', 'Full', 'Cancelled', 'Completed'] %}
+                <option value="{{ st }}" {% if slot.status == st %}selected{% endif %}>{{ st }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('exam_slots', exam_id=slot.exam_id) }}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Slot</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Manage Examiners</h2>
+    <div class="card">
+        <div class="card-header">
+            Registered Examiners
+        </div>
+
+        <div class="card-body">
+            {% if examiners %}
+            <div class="table-responsive">
+            <form method="GET" class="d-flex mb-3" style="max-width: 350px;">
+                <input type="text" name="q" class="form-control form-control-sm me-2" placeholder="Search by Name or ID..." value="{{ search_q or '' }}">
+                <button type="submit" class="btn btn-outline-primary btn-sm me-1">Search</button>
+                {% if search_q %}
+                <a href="{{ request.path }}" class="btn btn-outline-secondary btn-sm">Clear</a>
+                {% endif %}
+            </form>
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for examiner in examiners %}
+                        <tr>
+                            <td>{{ examiner.id }}</td>
+                            <td>{{ examiner.name }}</td>
+                            <td>{{ examiner.email }}</td>
+                            <td>{{ examiner.phone }}</td>
+                            <td>{{ examiner.department }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if examiner.status == 'Active' else 'warning text-dark' }}">
+                                    {{ examiner.status }}
+                                </span>
+                            </td>
+                            <td class="d-flex">
+                                <form method="POST" action="{{ url_for('examiner_status', examiner_id=examiner.id) }}" style="margin-right:5px">
+                                    {% if examiner.status == 'Active' %}
+                                    <button type="submit" class="btn btn-warning btn-sm">Deactivate</button>
+                                    {% else %}
+                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                    {% endif %}
+                                </form>
+                                <a href="{{ url_for('edit_examiner', examiner_id=examiner.id) }}" class="btn btn-primary btn-sm" style="margin-right:5px">Edit</a>
+                                <form method="POST" action="{{ url_for('delete_examiner', examiner_id=examiner.id) }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">
+                No examiners have registered yet.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Available Slots: {{ exam.exam_name }}</h3>
+            <span class="text-muted">
+                Course: {{ exam.course.course_name }} | Duration: {{ exam.duration }} mins | Booking Window: {{ exam.slot_booking_start_date }} to {{ exam.slot_booking_end_date }}
+            </span>
+        </div>
+    </div>
+
+    {% if existing_booking %}
+    <div class="alert alert-info">
+        You already have an active booking for this exam on <strong>{{ existing_booking.slot.date }} ({{ existing_booking.slot.start_time }} - {{ existing_booking.slot.end_time }})</strong>.
+    </div>
+    {% elif not booking_open %}
+    <div class="alert alert-warning">
+        Slot booking is currently closed for this examination.
+    </div>
+    {% endif %}
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Slot ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Examiner</th>
+                    <th>Available Seats</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for slot in slots %}
+                <tr>
+                    <td>{{ slot.id }}</td>
+                    <td>{{ slot.date }}</td>
+                    <td>{{ slot.start_time }} - {{ slot.end_time }}</td>
+                    <td>{{ slot.examiner.name }}</td>
+                    <td>{{ slot.available_seats }} / {{ slot.max_capacity }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if slot.status == 'Available' else 'secondary' }}">
+                            {{ slot.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if existing_booking and existing_booking.slot_id == slot.id %}
+                        <span class="badge bg-primary">Your Booked Slot</span>
+                        {% elif booking_open and not existing_booking and slot.available_seats > 0 and slot.status == 'Available' %}
+                        <form method="POST" action="{{ url_for('book_slot', slot_id=slot.id) }}">
+                            <button type="submit" class="btn btn-success btn-sm">Book Slot</button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>Unavailable</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No slots have been created for this examination yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
